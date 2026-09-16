@@ -5,6 +5,8 @@ A Streamlit application for transparent DCF valuation and constrained portfolio 
 ## Features
 
 - Three-scenario FCFF DCF, WACC / terminal-growth sensitivity grid, editable historical inputs and forecast export.
+- Two-stage and three-stage dividend-discount models with explicit company-type suitability guidance.
+- P/E, P/B, P/S and EV/EBITDA valuation models with editable market and fundamental inputs.
 - Constrained maximum-Sharpe, minimum-volatility and risk-parity portfolios.
 - Historical VaR, expected shortfall, maximum drawdown, correlation and risk-contribution views.
 
