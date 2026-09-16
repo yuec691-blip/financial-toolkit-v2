@@ -41,16 +41,31 @@ def prices_for(tickers, start, end):
     return data.dropna(axis=1, how="all").ffill().dropna()
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_data(ttl=300, show_spinner=False)
 def company_data(ticker):
     stock = yf.Ticker(ticker)
     info = stock.info or {}
     financials, cashflow = stock.financials, stock.cashflow
+    latest_price = None
+    price_as_of = "Unavailable"
+    try:
+        latest_price = float(stock.fast_info.last_price)
+    except Exception:
+        pass
+    try:
+        quote_history = stock.history(period="5d", interval="1d", auto_adjust=False)
+        if not quote_history.empty:
+            if latest_price is None:
+                latest_price = float(quote_history["Close"].dropna().iloc[-1])
+            price_as_of = str(quote_history.index[-1].date())
+    except Exception:
+        pass
     fallback = pd.DataFrame({"Year": ["2022", "2023", "2024"], "Revenue": [1000., 1100., 1200.],
                              "EBIT": [150., 165., 180.], "D&A": [35., 38., 40.],
                              "CapEx": [-55., -58., -60.], "Change in WC": [-15., -16., -18.]})
     result = {
-        "price": float(info.get("currentPrice") or info.get("regularMarketPrice") or 100),
+        "price": float(latest_price or info.get("currentPrice") or info.get("regularMarketPrice") or 100),
+        "price_as_of": price_as_of,
         "shares": float(info.get("sharesOutstanding") or 1_000_000_000) / 1e6,
         "debt": float(info.get("totalDebt") or 0) / 1e6,
         "cash": float(info.get("totalCash") or 0) / 1e6,
@@ -205,12 +220,17 @@ else:
     app_header("DCF valuation", "A transparent FCFF valuation with downside, base and upside scenarios. Figures are estimates, not a price target or investment recommendation.")
     st.sidebar.header("1. Company and capital structure")
     ticker = st.sidebar.text_input("Ticker", "AAPL").upper().strip()
+    if st.sidebar.button("Refresh latest market data"):
+        company_data.clear()
+        st.rerun()
     try:
         with st.spinner("Loading company data..."):
             data = company_data(ticker)
     except Exception:
-        data = {"price": 100., "shares": 1000., "debt": 0., "cash": 0., "beta": 1., "history": pd.DataFrame() , "live": False}
-    price = st.sidebar.number_input("Current share price ($)", min_value=.01, value=float(data["price"]))
+        data = {"price": 100., "price_as_of": "Unavailable", "shares": 1000., "debt": 0., "cash": 0., "beta": 1., "history": pd.DataFrame() , "live": False}
+    price = st.sidebar.number_input(
+        "Current share price ($)", min_value=.01, value=float(data["price"]), key=f"current_price_{ticker}"
+    )
     shares = st.sidebar.number_input("Diluted shares outstanding (millions)", min_value=.1, value=float(data["shares"]), step=10.)
     debt = st.sidebar.number_input("Total debt ($m)", min_value=0., value=float(data["debt"]), step=100.)
     cash = st.sidebar.number_input("Cash and investments ($m)", min_value=0., value=float(data["cash"]), step=100.)
@@ -253,12 +273,17 @@ else:
     outputs = {name: dcf_value(base_revenue, assumptions, capital, inputs) for name, inputs in scenarios.items()}
     base_value, forecast, ev, pv_terminal = outputs["Base"]
     upside = base_value / price - 1
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Base fair value", f"${base_value:,.2f}", f"{upside:+.1%} vs. market")
-    m2.metric("WACC", f"{wacc:.2%}")
-    m3.metric("Terminal value / EV", f"{pv_terminal / ev:.1%}")
-    m4.metric("Latest revenue", f"${base_revenue:,.0f}m")
-    st.caption("Live market and financial data are sourced from Yahoo Finance where available. You can override all key inputs above.")
+    m1, m2, m3, m4, m5 = st.columns(5)
+    m1.metric(f"{ticker} latest market price", f"${price:,.2f}")
+    m2.metric("Base fair value", f"${base_value:,.2f}", f"{upside:+.1%} vs. market")
+    m3.metric("WACC", f"{wacc:.2%}")
+    m4.metric("Terminal value / EV", f"{pv_terminal / ev:.1%}")
+    m5.metric("Latest revenue", f"${base_revenue:,.0f}m")
+    st.caption(
+        f"Latest quoted session: {data.get('price_as_of', 'Unavailable')} · "
+        "Market and financial data are sourced from Yahoo Finance where available and may be delayed. "
+        "You can override the price and all key inputs in the sidebar."
+    )
     tab1, tab2, tab3 = st.tabs(["Scenarios", "Sensitivity", "Forecast & bridge"])
     with tab1:
         scenario_table = pd.DataFrame({"Scenario": list(outputs), "Fair value / share": [x[0] for x in outputs.values()],
