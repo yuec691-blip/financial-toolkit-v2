@@ -15,7 +15,16 @@ st.set_page_config(page_title="Financial Toolkit v2", page_icon="📊", layout="
 st.markdown("""
 <style>
   .block-container {max-width: 1450px; padding-top: 2rem;}
-  [data-testid="stMetric"] {background:#f7f9fc; border:1px solid #e7ebf1; border-radius:12px; padding:14px;}
+  [data-testid="stMetric"] {
+    background:#f7f9fc;
+    border:1px solid #e7ebf1;
+    border-radius:12px;
+    padding:14px;
+    color:#101828 !important;
+  }
+  [data-testid="stMetric"] * {
+    color:#101828 !important;
+  }
   .stAlert {border-radius:10px;}
 </style>
 """, unsafe_allow_html=True)
