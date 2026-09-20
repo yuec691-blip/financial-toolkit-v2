@@ -8,6 +8,8 @@ import plotly.graph_objects as go
 import streamlit as st
 import yfinance as yf
 from scipy.optimize import minimize
+from portfolio_workbench import render_portfolio_workbench
+from valuation_summary import render_valuation_summary
 
 
 st.set_page_config(page_title="Financial Toolkit v2", page_icon="📊", layout="wide")
@@ -186,11 +188,16 @@ def app_header(title, subtitle):
 
 
 mode = st.sidebar.radio(
-    "Analysis", ["Portfolio construction", "DCF valuation", "DDM & relative valuation"], label_visibility="collapsed"
+    "Analysis",
+    ["Portfolio workbench", "Portfolio construction", "DCF valuation", "DDM & relative valuation", "Valuation summary"],
+    label_visibility="collapsed",
 )
 st.sidebar.divider()
 
-if mode == "Portfolio construction":
+if mode == "Portfolio workbench":
+    render_portfolio_workbench()
+
+elif mode == "Portfolio construction":
     app_header("Portfolio construction", "Constrained allocation, risk attribution and historical stress testing. This is analysis, not investment advice.")
     st.sidebar.header("1. Investment universe")
     symbols = st.sidebar.text_input("Tickers (comma-separated)", "AAPL,MSFT,NVDA,GOOGL,AMZN,META").upper()
@@ -359,7 +366,7 @@ elif mode == "DCF valuation":
             st.dataframe(bridge.style.format({"$m": "{:,.1f}"}), use_container_width=True)
         st.download_button("Download base-case forecast CSV", forecast.to_csv(index=False), f"{ticker}_dcf_forecast.csv", "text/csv")
 
-else:
+elif mode == "DDM & relative valuation":
     app_header(
         "DDM & relative valuation",
         "Dividend-discount and market-multiple valuation models with explicit company-type guidance. Outputs are analytical estimates, not investment advice.",
@@ -514,3 +521,6 @@ else:
                 {"Input": "Diluted shares (m)", "Value": shares},
             ]
         st.dataframe(pd.DataFrame(bridge_rows).style.format({"Value": "{:,.2f}"}), use_container_width=True)
+
+else:
+    render_valuation_summary(company_data, dcf_value, two_stage_ddm)
