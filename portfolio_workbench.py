@@ -87,6 +87,43 @@ def render_portfolio_workbench():
     st.title("Portfolio analyst workbench")
     st.caption("Import holdings, create a target portfolio, generate a trade list, compare with a benchmark and run a no-look-ahead walk-forward backtest.")
 
+    with st.expander("📘 How to use this app", expanded=True):
+        st.markdown(
+            """
+            **Quick start**
+
+            1. **Enter your holdings** below or upload a CSV with `Ticker` and `Shares`; `Cost basis / share` is optional.
+            2. **Choose the mandate** in the sidebar: benchmark, optimization objective, position limits, rebalancing threshold and estimated trading cost.
+            3. Select **Run portfolio workbench** to generate target weights, suggested trades, performance attribution and a walk-forward backtest.
+            4. **Review before acting** and download the holdings or rebalance CSV when you are satisfied with the assumptions.
+            """
+        )
+        guide_left, guide_right = st.columns(2)
+        with guide_left:
+            st.markdown(
+                """
+                **Choose the right analysis**
+
+                - **Portfolio workbench:** analyze an existing portfolio and produce a rebalance plan.
+                - **Portfolio construction:** build a new allocation from a list of securities.
+                - **DCF valuation:** value a company from projected free cash flow.
+                """
+            )
+        with guide_right:
+            st.markdown(
+                """
+                **Valuation tools**
+
+                - **DDM & relative valuation:** use dividends or market multiples to estimate fair value.
+                - **Valuation summary:** combine several valuation methods into one weighted estimate.
+                - Move between modules using the **Analysis** menu in the left sidebar.
+                """
+            )
+        st.info(
+            "Market data is sourced from Yahoo Finance and may be delayed or incomplete. "
+            "Model outputs are sensitive to assumptions and are for analysis and education, not investment advice."
+        )
+
     default_holdings = pd.DataFrame({
         "Ticker": ["AAPL", "MSFT", "NVDA", "GOOGL"],
         "Shares": [100., 80., 60., 75.],
