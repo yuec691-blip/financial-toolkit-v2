@@ -11,6 +11,7 @@ A Streamlit application for transparent DCF valuation and constrained portfolio 
 - Historical VaR, expected shortfall, maximum drawdown, correlation and risk-contribution views.
 - Portfolio workbench with CSV holdings import/export, session portfolios, target weights and executable rebalance trade lists.
 - Benchmark comparison, security-level return contribution and cost-aware walk-forward backtesting.
+- Fixed-income holdings analytics with cash-flow YTM, duration, convexity, DV01, spread risk and rate/spread scenario testing.
 - Blended valuation summary with editable model weights, dispersion and confidence indicators.
 
 ## Run locally

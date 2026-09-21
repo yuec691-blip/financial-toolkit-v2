@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import streamlit as st
 import yfinance as yf
 from scipy.optimize import minimize
+from fixed_income_workbench import render_fixed_income_workbench
 from portfolio_workbench import render_portfolio_workbench
 from valuation_summary import render_valuation_summary
 
@@ -189,13 +190,19 @@ def app_header(title, subtitle):
 
 mode = st.sidebar.radio(
     "Analysis",
-    ["Portfolio workbench", "Portfolio construction", "DCF valuation", "DDM & relative valuation", "Valuation summary"],
+    [
+        "Portfolio workbench", "Fixed income risk", "Portfolio construction", "DCF valuation",
+        "DDM & relative valuation", "Valuation summary",
+    ],
     label_visibility="collapsed",
 )
 st.sidebar.divider()
 
 if mode == "Portfolio workbench":
     render_portfolio_workbench()
+
+elif mode == "Fixed income risk":
+    render_fixed_income_workbench()
 
 elif mode == "Portfolio construction":
     app_header("Portfolio construction", "Constrained allocation, risk attribution and historical stress testing. This is analysis, not investment advice.")

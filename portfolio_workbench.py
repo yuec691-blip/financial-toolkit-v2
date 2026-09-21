@@ -105,6 +105,7 @@ def render_portfolio_workbench():
                 **Choose the right analysis**
 
                 - **Portfolio workbench:** analyze an existing portfolio and produce a rebalance plan.
+                - **Fixed income risk:** measure bond yield, duration, DV01, spread risk and scenario P&L.
                 - **Portfolio construction:** build a new allocation from a list of securities.
                 - **DCF valuation:** value a company from projected free cash flow.
                 """
